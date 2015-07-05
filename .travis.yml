@@ -1,0 +1,22 @@
+language: python
+
+python:
+ - "2.7"
+
+before_install:
+ - git clone https://github.com/httpPrincess/fakedEpicServer
+
+install:
+ - pip install -r requirements.txt
+ - pip install -r testing_requirements.txt
+ - pip install -r fakedEpicServer/requirements.txt
+
+before_script:
+ - python fakedEpicServer/simpleEpic.py
+
+script:
+ - find swift_persistent_identifier -name "*.py" -exec pep8 {} \;
+ - find test -name "*.py" -exec pep8 {} \;
+ - nosetests --with-coverage --cover-package=swift_persistent_identifier
+ - radon mi swift_persistent_identifier
+ - radon cc swift_persistent_identifier
