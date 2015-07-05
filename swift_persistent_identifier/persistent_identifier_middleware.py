@@ -2,6 +2,7 @@ from persistent_identifier_client import create_pid, delete_pid
 from swift.common.utils import get_logger, split_path
 from webob import Request, Response
 
+
 class PersistentIdentifierMiddleware(object):
     """
     PID Middleware that creates PIDs for incoming objects if requested
@@ -48,9 +49,9 @@ class PersistentIdentifierMiddleware(object):
                         logger=self.logger)
                     return self.app(env, response.finish_response)
                 else:
-                    return Response(status=502,
-                                    body='Could not contact PID API')\
-                        (env, start_response)
+                    return Response(
+                        status=502,
+                        body='Could not contact PID API')(env, start_response)
         return self.app(env, start_response)
 
 
@@ -72,6 +73,7 @@ class PersistentIdentifierResponse(object):
                        username=self.username,
                        password=self.password)
         self.start_response(status, headers)
+
 
 def filter_factory(global_config, **local_conf):
     """

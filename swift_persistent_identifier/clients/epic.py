@@ -1,5 +1,6 @@
 from requests import delete, post
 
+
 def create_pid(object_url, api_url, username, password):
     payload = [{'type': 'URL', 'parsed_data': object_url}]
     try:
