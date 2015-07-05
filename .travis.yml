@@ -12,7 +12,7 @@ install:
  - pip install -r fakedEpicServer/requirements.txt
 
 before_script:
- - python fakedEpicServer/simpleEpic.py
+ - python fakedEpicServer/simpleEpic.py &
 
 script:
  - find swift_persistent_identifier -name "*.py" -exec pep8 {} \;
