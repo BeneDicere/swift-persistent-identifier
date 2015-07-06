@@ -1,4 +1,4 @@
-from persistent_identifier_client import create_pid, delete_pid
+from .persistent_identifier_client import create_pid, delete_pid
 from swift.common.utils import get_logger, split_path
 from webob import Request, Response
 
@@ -21,28 +21,36 @@ class PersistentIdentifierMiddleware(object):
                                      log_to_console=True)
 
     def __call__(self, env, start_response):
+        """
+        If called with header X-Pid-Create and Method PUT become active and
+        create a PID and store it with the object
+        :param env: request environment
+        :param start_response: function that we call when creating response
+        :return:
+        """
         self.start_response = start_response
         request = Request(env)
         if request.method == 'PUT':
-            try:
-                (version, account, container, objname) = \
-                    split_path(request.path_info, 4, 4, True)
-            except ValueError:
-                return self.app(env, start_response)
-            self.logger.info('{},{},{},{}'.format(version,
-                                                  account,
-                                                  container,
-                                                  objname))
-            if 'X-Pid-Create' in request.headers.keys():
-                self.logger.info('Create a PID')
-                success, pid = create_pid(object_url='tmp',
+            # try:
+            #     (version, account, container, objname) = \
+            #         split_path(request.path_info, 4, 4, True)
+            # except ValueError:
+            #     return self.app(env, start_response)
+            # self.logger.debug('{},{},{},{}'.format(version,
+            #                                        account,
+            #                                        container,
+            #                                        objname))
+            if 'X-Pid-Create' in list(request.headers.keys()):
+                url = '{}{}'.format(request.host_url, request.path_info)
+                self.logger.info('Create a PID for {}'.format(url))
+                success, pid = create_pid(object_url=url,
                                           api_url=self.conf.get('api_url'),
                                           username=self.conf.get('username'),
                                           password=self.conf.get('password'))
                 if success:
                     request.headers['X-Object-Meta-PID'] = pid
                     response = PersistentIdentifierResponse(
-                        headers=request.headers,
+                        pid=request.headers['X-Object-Meta-PID'],
                         username=self.conf.get('username'),
                         password=self.conf.get('password'),
                         start_response=start_response,
@@ -56,18 +64,35 @@ class PersistentIdentifierMiddleware(object):
 
 
 class PersistentIdentifierResponse(object):
-
-    def __init__(self, headers, username, password, start_response, logger):
-        self.headers = headers
+    """
+    Class that is created during request and that add X-Persistent-Identifier
+    header to the response if a Persistent Identifier was requested
+    """
+    def __init__(self, pid, username, password, start_response, logger):
+        """
+        Hold pid url and credentials for response creation
+        :param pid: persistent identifier url
+        :param username: username for pid service
+        :param password: password for pid service
+        :param start_response: function that we call after we are finished
+        :param logger: swift logger for logging
+        :return: -
+        """
+        self.pid = pid
         self.username = username
         self.password = password
         self.start_response = start_response
         self.logger = logger
 
     def finish_response(self, status, headers):
+        """
+        Visited while creating the response
+        :param status: status of the former middlewares and apps
+        :param headers: headers of the former middlewares and apps
+        :return: -
+        """
         if int(status.split(' ')[0]) == 201:
-            headers.append(('Persistent-Identifier',
-                            self.headers['X-Object-Meta-PID']))
+            headers.append(('Persistent-Identifier', self.pid))
         else:
             delete_pid(pid_url=self.headers['X-Object-Meta-PID'],
                        username=self.username,
