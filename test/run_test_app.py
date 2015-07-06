@@ -9,7 +9,11 @@ def sample_app(environ, start_response):
         headers = [('Content-Type', 'text/plain')]
     else:
         headers = []
-    start_response('201 Created', headers)
+    if 'notfound' in environ['QUERY_STRING']:
+        status = '404 Not Found'
+    else:
+        status = '201 Created'
+    start_response(status, headers)
     return body
 
 
