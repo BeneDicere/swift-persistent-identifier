@@ -16,7 +16,7 @@ def create_pid(object_url, api_url, username, password):
                         json=payload,
                         auth=(username, password))
     except Exception as err:
-        return False, str(err.message)
+        return False, str(err)
 
     if response.status_code == 201 and response.headers['Location']:
         return True, response.headers['Location']
@@ -35,7 +35,7 @@ def delete_pid(pid_url, username, password):
     try:
         response = delete(pid_url, auth=(username, password))
     except Exception as err:
-        return False, str(err.message)
+        return False, str(err)
 
     if response.status_code == 204:
         return True, str(response.status_code)
