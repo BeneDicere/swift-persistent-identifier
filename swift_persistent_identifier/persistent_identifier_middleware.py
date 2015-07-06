@@ -94,7 +94,7 @@ class PersistentIdentifierResponse(object):
         if int(status.split(' ')[0]) == 201:
             headers.append(('Persistent-Identifier', self.pid))
         else:
-            delete_pid(pid_url=self.headers['X-Object-Meta-PID'],
+            delete_pid(pid_url=self.pid,
                        username=self.username,
                        password=self.password)
         self.start_response(status, headers)
