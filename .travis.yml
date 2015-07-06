@@ -1,10 +1,13 @@
 language: python
 
 python:
+ - "2.6"
  - "2.7"
+ - "3.3"
+ - "3.4"
 
 before_install:
- - git clone https://github.com/httpPrincess/fakedEpicServer
+ - git clone https://github.com/BeneDicere/fakedEpicServer.git
 
 install:
  - pip install -r requirements.txt
