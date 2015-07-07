@@ -25,6 +25,7 @@ setup(
     zip_safe=False,
     install_requires=[
         'setuptools',
+        'requests>=2.7.0'
         ],
     entry_points={
         'paste.filter_factory': ['persistent_identifier_middleware = '
