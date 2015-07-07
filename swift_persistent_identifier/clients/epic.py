@@ -1,7 +1,7 @@
 from requests import delete, post
 
 
-def create_pid(object_url, api_url, username, password):
+def create_pid(object_url, api_url, username, password, parent=None):
     """
     Create a EPIC PIC that is pointing to the digital object we have stored
     :param object_url: absolute object url that the pid points to
@@ -11,6 +11,8 @@ def create_pid(object_url, api_url, username, password):
     :return: (boolean, str)
     """
     payload = [{'type': 'URL', 'parsed_data': object_url}]
+    if parent:
+        payload[0]['EUDAT/PPID'] = parent
     try:
         response = post(url=api_url,
                         json=payload,

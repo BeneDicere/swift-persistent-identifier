@@ -43,10 +43,15 @@ class PersistentIdentifierMiddleware(object):
             if 'X-Pid-Create' in list(request.headers.keys()):
                 url = '{}{}'.format(request.host_url, request.path_info)
                 self.logger.info('Create a PID for {}'.format(url))
+                if 'X-Pid-Parent' in list(request.headers.keys()):
+                    parent = request.headers['X-Pid-Parent']
+                else:
+                    parent = None
                 success, pid = create_pid(object_url=url,
                                           api_url=self.conf.get('api_url'),
                                           username=self.conf.get('username'),
-                                          password=self.conf.get('password'))
+                                          password=self.conf.get('password'),
+                                          parent=parent)
                 if success:
                     request.headers['X-Object-Meta-PID'] = pid
                     response = PersistentIdentifierResponse(
