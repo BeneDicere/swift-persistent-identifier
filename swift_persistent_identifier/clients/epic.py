@@ -10,10 +10,11 @@ def create_pid(object_url, api_url, username, password, parent=None):
     :param password: EPIC password
     :return: (boolean, str)
     """
-    payload = [{'type': 'URL', 'parsed_data': object_url}]
+    payload = [{1: {'type': 'URL', 'parsed_data': object_url}}]
     if parent:
-        payload[0]['EUDAT/PPID'] = parentvi
+        payload[0][2] = {'type': 'EUDAT/PPID', 'parsed_data': parent}
     try:
+        print payload
         response = post(url=api_url,
                         json=payload,
                         auth=(username, password))
