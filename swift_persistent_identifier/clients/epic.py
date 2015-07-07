@@ -14,7 +14,6 @@ def create_pid(object_url, api_url, username, password, parent=None):
     if parent:
         payload[0][2] = {'type': 'EUDAT/PPID', 'parsed_data': parent}
     try:
-        print payload
         response = post(url=api_url,
                         json=payload,
                         auth=(username, password))
