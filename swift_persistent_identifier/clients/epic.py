@@ -12,7 +12,7 @@ def create_pid(object_url, api_url, username, password, parent=None):
     """
     payload = [{'type': 'URL', 'parsed_data': object_url}]
     if parent:
-        payload[0]['EUDAT/PPID'] = parent
+        payload[0]['EUDAT/PPID'] = parentvi
     try:
         response = post(url=api_url,
                         json=payload,

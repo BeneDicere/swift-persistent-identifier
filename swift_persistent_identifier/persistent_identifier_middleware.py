@@ -18,7 +18,7 @@ class PersistentIdentifierMiddleware(object):
         else:
             self.logger = get_logger(conf=conf,
                                      log_route='persistend-identifier',
-                                     log_to_console=True)
+                                     log_to_console=False)
 
     def __call__(self, env, start_response):
         """
@@ -42,7 +42,6 @@ class PersistentIdentifierMiddleware(object):
             #                                        objname))
             if 'X-Pid-Create' in list(request.headers.keys()):
                 url = '{}{}'.format(request.host_url, request.path_info)
-                self.logger.info('Create a PID for {}'.format(url))
                 if 'X-Pid-Parent' in list(request.headers.keys()):
                     parent = request.headers['X-Pid-Parent']
                 else:
@@ -53,6 +52,7 @@ class PersistentIdentifierMiddleware(object):
                                           password=self.conf.get('password'),
                                           parent=parent)
                 if success:
+                    self.logger.info('Created a PID for {}'.format(url))
                     request.headers['X-Object-Meta-PID'] = pid
                     response = PersistentIdentifierResponse(
                         pid=request.headers['X-Object-Meta-PID'],
@@ -62,6 +62,8 @@ class PersistentIdentifierMiddleware(object):
                         logger=self.logger)
                     return self.app(env, response.finish_response)
                 else:
+                    self.logger.error('Unable to create  a PID for {},'
+                                      'because of {}'.format(url, pid))
                     return Response(
                         status=502,
                         body='Could not contact PID API')(env, start_response)
