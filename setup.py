@@ -20,7 +20,8 @@ setup(
     author='BeneDicere',
     author_email='b.von.st.vieth@fz-juelich.de',
     include_package_data=True,
-    packages=['swift_persistent_identifier'],
+    packages=['swift_persistent_identifier',
+              'swift_persistent_identifier.clients'],
     zip_safe=False,
     install_requires=[
         'setuptools',
