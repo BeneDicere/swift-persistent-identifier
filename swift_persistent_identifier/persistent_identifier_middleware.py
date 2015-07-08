@@ -99,7 +99,7 @@ class PersistentIdentifierResponse(object):
         :return: -
         """
         if int(status.split(' ')[0]) == 201:
-            headers.append(('Persistent-Identifier', self.pid))
+            headers.append(('X-Pid-Url', self.pid))
         else:
             delete_pid(pid_url=self.pid,
                        username=self.username,
