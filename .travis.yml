@@ -6,7 +6,7 @@ python:
  - "3.4"
 
 before_install:
- - git clone https://github.com/BeneDicere/fakedEpicServer.git
+ - git clone https://github.com/httpPrincess/fakedEpicServer.git
 
 install:
  - pip install -r requirements.txt
