@@ -50,7 +50,7 @@ def add_pid_checksum(pid_url, checksum, username, password):
     Update a PID. If its configured to store the checksum with a pid, update a
     PID after successfully storing a object and getting a Etag (md5sum)
     :param pid_url: absolute url for the PID
-    :param entries: entries that should be added to the original PID
+    :param checksum: checksum that should be added to the original PID
     :param username: EPIC username
     :param password: EPIC password
     :return: (boolean, str)
