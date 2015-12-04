@@ -1,5 +1,6 @@
-from .persistent_identifier_client import create_pid, delete_pid, update_pid
-from swift.common.utils import get_logger, split_path
+from .persistent_identifier_client \
+    import add_pid_checksum, create_pid, delete_pid
+from swift.common.utils import get_logger  # , split_path
 from webob import Request, Response
 
 
@@ -105,11 +106,11 @@ class PersistentIdentifierResponse(object):
             headers.append(('X-Pid-Url', self.pid))
             if self.add_checksum:
                 checksum = headers['Etag']
-                update_pid(pid_url=self.pid,
-                           checksum=checksum,
-                           username=self.username,
-                           password=self.password
-                           )
+                add_pid_checksum(pid_url=self.pid,
+                                 checksum=checksum,
+                                 username=self.username,
+                                 password=self.password
+                                 )
         else:
             delete_pid(pid_url=self.pid,
                        username=self.username,
@@ -120,6 +121,9 @@ class PersistentIdentifierResponse(object):
 def filter_factory(global_config, **local_conf):
     """
     Returns a WSGI filter app for use with paste.deploy.
+    :param global_config: global config
+    :param local_conf: local config
+    :return: PersistentIdentifierMiddleware
     """
     conf = global_config.copy()
     conf.update(local_conf)
