@@ -1,5 +1,6 @@
 from unittest import TestCase
-from swift_persistent_identifier.clients.epic import create_pid, delete_pid
+from swift_persistent_identifier.clients.epic \
+    import create_pid, delete_pid, add_pid_checksum
 
 
 class TestClientsEpic(TestCase):
@@ -62,3 +63,26 @@ class TestClientsEpic(TestCase):
                                       username=self.username,
                                       password=self.password)
         self.assertEqual(success, False)
+
+    def test_update_pid(self):
+        success, pid_url = create_pid(object_url='http://swift:88/v1/acc/d/f',
+                                      api_url=self.api_url,
+                                      username=self.username,
+                                      password=self.password)
+        self.assertEqual(success, True)
+        self.assertEqual(type(pid_url), str)
+
+        success, message = add_pid_checksum(pid_url=pid_url,
+                                            checksum='BAR',
+                                            username=self.username,
+                                            password=self.password)
+        self.assertEqual(success, True)
+        self.assertEqual(type(message), str)
+
+    def test_update_pid_nonexisting(self):
+        success, message = add_pid_checksum(pid_url=self.api_url + '123',
+                                            checksum='BAR',
+                                            username=self.username,
+                                            password=self.password)
+        self.assertEqual(success, False)
+        self.assertEqual(type(message), str)

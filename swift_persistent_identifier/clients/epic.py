@@ -1,4 +1,4 @@
-from requests import delete, post
+from requests import delete, get, post, put
 
 
 def create_pid(object_url, api_url, username, password, parent=None):
@@ -40,6 +40,33 @@ def delete_pid(pid_url, username, password):
         return False, str(err)
 
     if response.status_code == 204:
+        return True, str(response.status_code)
+    else:
+        return False, str(response.status_code)
+
+
+def add_pid_checksum(pid_url, checksum, username, password):
+    """
+    Update a PID. If its configured to store the checksum with a pid, update a
+    PID after successfully storing a object and getting a Etag (md5sum)
+    :param pid_url: absolute url for the PID
+    :param entries: entries that should be added to the original PID
+    :param username: EPIC username
+    :param password: EPIC password
+    :return: (boolean, str)
+    """
+    response = get(pid_url, auth=(username, password))
+    if response.status_code != 200:
+        return False, str(response.status_code)
+    request = response.json()
+    request.append({'type': 'CHECKSUM', 'parsed_data': checksum})
+    try:
+        response = put(url=pid_url,
+                       json=request,
+                       auth=(username, password))
+    except Exception as err:
+        return False, str(err)
+    if response.status_code == 201:
         return True, str(response.status_code)
     else:
         return False, str(response.status_code)

@@ -1,4 +1,4 @@
-from .persistent_identifier_client import create_pid, delete_pid
+from .persistent_identifier_client import create_pid, delete_pid, update_pid
 from swift.common.utils import get_logger, split_path
 from webob import Request, Response
 
@@ -56,6 +56,7 @@ class PersistentIdentifierMiddleware(object):
                     request.headers['X-Object-Meta-PID'] = pid
                     response = PersistentIdentifierResponse(
                         pid=request.headers['X-Object-Meta-PID'],
+                        add_checksum=self.conf.get('add_checksum', False),
                         username=self.conf.get('username'),
                         password=self.conf.get('password'),
                         start_response=start_response,
@@ -75,7 +76,8 @@ class PersistentIdentifierResponse(object):
     Class that is created during request and that add X-Persistent-Identifier
     header to the response if a Persistent Identifier was requested
     """
-    def __init__(self, pid, username, password, start_response, logger):
+    def __init__(self, pid, add_checksum, username,
+                 password, start_response, logger):
         """
         Hold pid url and credentials for response creation
         :param pid: persistent identifier url
@@ -86,6 +88,7 @@ class PersistentIdentifierResponse(object):
         :return: -
         """
         self.pid = pid
+        self.add_checksum = add_checksum
         self.username = username
         self.password = password
         self.start_response = start_response
@@ -100,6 +103,13 @@ class PersistentIdentifierResponse(object):
         """
         if int(status.split(' ')[0]) == 201:
             headers.append(('X-Pid-Url', self.pid))
+            if self.add_checksum:
+                checksum = headers['Etag']
+                update_pid(pid_url=self.pid,
+                           checksum=checksum,
+                           username=self.username,
+                           password=self.password
+                           )
         else:
             delete_pid(pid_url=self.pid,
                        username=self.username,
