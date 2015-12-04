@@ -17,6 +17,15 @@ class TestClientsEpic(TestCase):
         self.assertEqual(success, True)
         self.assertEqual(type(pid_url), str)
 
+    def test_create_pid_with_parent(self):
+        success, pid_url = create_pid(object_url='http://swift:88/v1/acc/d/f',
+                                      api_url=self.api_url,
+                                      username=self.username,
+                                      password=self.password,
+                                      parent='http://localhost/parent-pid')
+        self.assertEqual(success, True)
+        self.assertEqual(type(pid_url), str)
+
     def test_create_pid_fail(self):
         success, pid_url = create_pid(object_url='http://swift:88/v1/acc/d/f',
                                       api_url='http://localhost',
