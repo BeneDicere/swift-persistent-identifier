@@ -17,7 +17,7 @@ class PersistentIdentifierMiddleware(object):
             self.logger = logger
         else:
             self.logger = get_logger(conf=conf,
-                                     log_route='persistend-identifier',
+                                     log_route='persistent-identifier',
                                      log_to_console=False)
 
     def __call__(self, env, start_response):
