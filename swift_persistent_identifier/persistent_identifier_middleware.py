@@ -150,10 +150,15 @@ class PersistentIdentifierResponse(object):
         :param headers: headers of the former middlewares and apps
         :return: -
         """
-        tmp = dict(headers)['X-Object-Meta-Pid']
-        if tmp:
-            headers.remove(('X-Object-Meta-Pid', tmp))
-            headers.append(('X-Pid-Url', tmp))
+
+        if int(status.split(' ')[0]) == 200:
+            try:
+                tmp = dict(headers)['X-Object-Meta-Pid']
+                headers.remove(('X-Object-Meta-Pid', tmp))
+                headers.append(('X-Pid-Url', tmp))
+            except KeyError:
+                self.logger.debug('Request for object without'
+                                  'X-Object-Meta-Pid header')
         self.start_response(status, headers)
 
 
