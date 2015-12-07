@@ -56,8 +56,8 @@ class PersistentIdentifierMiddleware(object):
                     self.logger.info('Created a PID for {}'.format(url))
                     request.headers['X-Object-Meta-PID'] = pid
                     response = PersistentIdentifierResponse(
-                        pid=request.headers['X-Object-Meta-PID'],
-                        add_checksum=self.conf.get('add_checksum', False),
+                        pid=pid,
+                        add_checksum=self.conf.get('add_checksum', 'False'),
                         username=self.conf.get('username'),
                         password=self.conf.get('password'),
                         start_response=start_response,
@@ -104,10 +104,9 @@ class PersistentIdentifierResponse(object):
         """
         if int(status.split(' ')[0]) == 201:
             headers.append(('X-Pid-Url', self.pid))
-            if self.add_checksum:
-                checksum = headers['Etag']
+            if self.add_checksum == 'True':
                 add_pid_checksum(pid_url=self.pid,
-                                 checksum=checksum,
+                                 checksum=dict(headers)['Etag'],
                                  username=self.username,
                                  password=self.password
                                  )
