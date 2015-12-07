@@ -1,6 +1,6 @@
 from .persistent_identifier_client \
     import add_pid_checksum, create_pid, delete_pid
-from swift.common.utils import get_logger  # , split_path
+from swift.common.utils import config_true_value, get_logger  # , split_path
 from webob import Request, Response
 
 
@@ -10,10 +10,14 @@ class PersistentIdentifierMiddleware(object):
     """
     def __init__(self, app, conf=None, logger=None):
         self.app = app
+
         if conf:
             self.conf = conf
         else:
             conf = {}
+        self.add_checksum = config_true_value(self.conf.get('add_checksum',
+                                                            'False'))
+
         if logger:
             self.logger = logger
         else:
@@ -57,7 +61,7 @@ class PersistentIdentifierMiddleware(object):
                     request.headers['X-Object-Meta-PID'] = pid
                     response = PersistentIdentifierResponse(
                         pid=pid,
-                        add_checksum=self.conf.get('add_checksum', 'False'),
+                        add_checksum=self.add_checksum,
                         username=self.conf.get('username'),
                         password=self.conf.get('password'),
                         start_response=start_response,
@@ -104,7 +108,7 @@ class PersistentIdentifierResponse(object):
         """
         if int(status.split(' ')[0]) == 201:
             headers.append(('X-Pid-Url', self.pid))
-            if self.add_checksum == 'True':
+            if self.add_checksum:
                 add_pid_checksum(pid_url=self.pid,
                                  checksum=dict(headers)['Etag'],
                                  username=self.username,
