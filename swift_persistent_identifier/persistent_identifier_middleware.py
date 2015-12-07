@@ -139,9 +139,8 @@ class PersistentIdentifierResponse(object):
 
     def finish_response_pidurl(self, status, headers):
         """
-        If X-Object-Meta-Pid is in the response, add X-Pid-Url header.
-        Both are then available, but this should be better for default swift
-        behaviour for now.
+        If X-Object-Meta-Pid is in the response, substitute it with
+        X-Pid-Url header.
 
         One could think this is double checked because we use get_object_info
         in the PersistentIdentifierMiddleware, but because get_object_info does
