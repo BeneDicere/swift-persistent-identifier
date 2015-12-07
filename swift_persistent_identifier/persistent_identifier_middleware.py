@@ -1,6 +1,7 @@
 from .persistent_identifier_client \
     import add_pid_checksum, create_pid, delete_pid
 from swift.common.utils import config_true_value, get_logger  # , split_path
+from swift.proxy.controllers.base import get_object_info
 from webob import Request, Response
 
 
@@ -73,6 +74,22 @@ class PersistentIdentifierMiddleware(object):
                     return Response(
                         status=502,
                         body='Could not contact PID API')(env, start_response)
+        if request.method == 'GET' or request.method == 'HEAD':
+            object_metadata = get_object_info(
+                env=request.environ,
+                app=self.app,
+                swift_source='PersistentIdentifierMiddleware')['meta']
+            if 'pid' in object_metadata.keys():
+                response = PersistentIdentifierResponse(
+                    pid='',
+                    add_checksum='',
+                    username='',
+                    password='',
+                    start_response=start_response,
+                    logger=self.logger)
+                return self.app(env, response.finish_response_pidurl)
+            else:
+                return self.app(env, start_response)
         return self.app(env, start_response)
 
 
@@ -118,6 +135,26 @@ class PersistentIdentifierResponse(object):
             delete_pid(pid_url=self.pid,
                        username=self.username,
                        password=self.password)
+        self.start_response(status, headers)
+
+    def finish_response_pidurl(self, status, headers):
+        """
+        If X-Object-Meta-Pid is in the response, add X-Pid-Url header.
+        Both are then available, but this should be better for default swift
+        behaviour for now.
+
+        One could think this is double checked because we use get_object_info
+        in the PersistentIdentifierMiddleware, but because get_object_info does
+        not do any authorization, we should use this double check.
+
+        :param status: status of the former middlewares and apps
+        :param headers: headers of the former middlewares and apps
+        :return: -
+        """
+        tmp = dict(headers)['X-Object-Meta-Pid']
+        if tmp:
+            headers.remove(('X-Object-Meta-Pid', tmp))
+            headers.append(('X-Pid-Url', tmp))
         self.start_response(status, headers)
 
 
