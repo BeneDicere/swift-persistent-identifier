@@ -1,6 +1,6 @@
 from .persistent_identifier_client \
     import add_pid_checksum, create_pid, delete_pid
-from swift.common.utils import config_true_value, get_logger  # , split_path
+from swift.common.utils import config_true_value, get_logger, split_path
 from swift.proxy.controllers.base import get_object_info
 from webob import Request, Response
 
@@ -37,15 +37,6 @@ class PersistentIdentifierMiddleware(object):
         self.start_response = start_response
         request = Request(env)
         if request.method == 'PUT':
-            # try:
-            #     (version, account, container, objname) = \
-            #         split_path(request.path_info, 4, 4, True)
-            # except ValueError:
-            #     return self.app(env, start_response)
-            # self.logger.debug('{},{},{},{}'.format(version,
-            #                                        account,
-            #                                        container,
-            #                                        objname))
             if 'X-Pid-Create' in list(request.headers.keys()):
                 url = '{}{}'.format(request.host_url, request.path_info)
                 if 'X-Pid-Parent' in list(request.headers.keys()):
@@ -74,7 +65,13 @@ class PersistentIdentifierMiddleware(object):
                     return Response(
                         status=502,
                         body='Could not contact PID API')(env, start_response)
-        if request.method == 'GET' or request.method == 'HEAD':
+        if request.method in ['GET', 'HEAD']:
+            # only modify response if we have a request for a object
+            try:
+                split_path(request.path_info, 4, 4, True)
+            except ValueError:
+                return self.app(env, start_response)
+
             object_metadata = get_object_info(
                 env=request.environ,
                 app=self.app,
@@ -88,9 +85,7 @@ class PersistentIdentifierMiddleware(object):
                     start_response=start_response,
                     logger=self.logger)
                 return self.app(env, response.finish_response_pidurl)
-            else:
-                return self.app(env, start_response)
-        return self.app(env, start_response)
+            return self.app(env, start_response)
 
 
 class PersistentIdentifierResponse(object):
