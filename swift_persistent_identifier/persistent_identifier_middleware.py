@@ -65,7 +65,7 @@ class PersistentIdentifierMiddleware(object):
                     return Response(
                         status=502,
                         body='Could not contact PID API')(env, start_response)
-        if request.method in ['GET', 'HEAD']:
+        elif request.method in ['GET', 'HEAD']:
             # only modify response if we have a request for a object
             try:
                 split_path(request.path_info, 4, 4, True)
@@ -85,7 +85,7 @@ class PersistentIdentifierMiddleware(object):
                     start_response=start_response,
                     logger=self.logger)
                 return self.app(env, response.finish_response_pidurl)
-            return self.app(env, start_response)
+        return self.app(env, start_response)
 
 
 class PersistentIdentifierResponse(object):
